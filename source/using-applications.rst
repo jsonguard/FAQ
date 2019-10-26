@@ -630,7 +630,17 @@ Zip-архивы, созданные штатными средствами ОС 
 Восстановить трей можно посредством установки одного из :ref:`расширений Gnome Shell <gnome-shell-extensions>`:
 
   1. `TopIcons Plus <https://extensions.gnome.org/extension/1031/topicons/>`__ (также доступно в виде пакета ``gnome-shell-extension-topicons-plus`` в репозиториях);
-  2. `AppIndicator Support <https://extensions.gnome.org/extension/615/appindicator-support/>`__.
+  2. `AppIndicator Support <https://extensions.gnome.org/extension/615/appindicator-support/>`__ (также доступно в виде пакета ``gnome-shell-extension-appindicator`` в репозиториях).
+
+.. index:: gnome, shell, desktop, icon
+.. _gnome-shell-desktop:
+
+Как вернуть классический рабочий стол в Gnome Shell?
+=======================================================
+
+Начиная с Gnome 3.28, поддержка рабочего стола с возможностью размещения на нём файлов, либо ярлыков приложений, была удалена.
+
+Восстановить классический рабочий стол можно при помощи установки :ref:`расширения Gnome Shell <gnome-shell-extensions>` `Desktop Icons <https://extensions.gnome.org/extension/1465/desktop-icons/>`__ (также доступно в виде пакета ``gnome-shell-extension-desktop-icons`` в репозиториях).
 
 .. index:: 7zip, archive, split, optical drive, dvd, p7zip
 .. _7zip-split:
@@ -830,7 +840,7 @@ Zip-архивы, созданные штатными средствами ОС 
 
 .. code-block:: text
 
-    find ~/.mozilla/firefox -name *.sqlite -exec sqlite3 {} VACUUM \;
+    find ~/.mozilla/firefox -name "*.sqlite" -exec sqlite3 {} VACUUM \;
 
 Это действие абсолютно безопасно, т.к. физически удаляет лишь те данные, которые в них были помечены в качестве удалённых.
 
@@ -993,3 +1003,49 @@ Zip-архивы, созданные штатными средствами ОС 
 .. code-block:: text
 
     gnome-shell --replace
+
+.. index:: hash, bash, check, files, sha512sum, sha2, sha512, find
+.. _dir-hash-save:
+
+Как сохранить контрольные суммы файлов в каталоге рекурсивно?
+================================================================
+
+Cгенерируем файл с контрольными суммами SHA2 (SHA-512) содержимого текущего каталога при помощи утилит **find** и **sha512sum**:
+
+.. code-block:: text
+
+    find -type f \( -not -name 'sha512sum.txt' \) -exec sha512sum '{}' \; > sha512sum.txt
+
+Результат будет сохранён в файле с именем **sha512sum.txt**.
+
+.. index:: hash, bash, check, verification, files, sha512sum, sha2, sha512
+.. _dir-hash-verify:
+
+Как проверить контрольные суммы файлов в каталоге?
+=====================================================
+
+Проверим контрольные суммы SHA2 (SHA-512), :ref:`сохранённые <dir-hash-save>` в **sha512sum.txt**:
+
+.. code-block:: text
+
+    sha512sum -c sha512sum.txt > check_results.txt
+
+Для удобства :ref:`перенаправим вывод <bash-pipelines>` в файл **check_results.txt** ибо он может быть очень большим и не поместиться на экране.
+
+.. index:: hash, bash, check, verification, files, sha512sum, sha2, sha512, grep
+.. _dir-hash-missmatch:
+
+Как вывести список не совпадающих с сохранёнными контрольными суммами файлов?
+=================================================================================
+
+Проверим контрольные суммы SHA2 (SHA-512), :ref:`сохранённые <dir-hash-save>` в **sha512sum.txt** и выведем лишь те, проверка которых завершилась неудачно:
+
+.. code-block:: text
+
+    sha512sum -c sha512sum.txt | grep -v 'OK'
+
+Для удобства :ref:`перенаправим вывод <bash-pipelines>` в файл **failed_results.txt** ибо он может быть очень большим и не поместиться на экране:
+
+.. code-block:: text
+
+    sha512sum -c sha512sum.txt | grep -v 'OK' > failed_results.txt

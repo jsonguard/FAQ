@@ -97,11 +97,13 @@
 
 См. `здесь <https://fedoraproject.org/wiki/GRUB_2>`__.
 
-.. index:: boot, grub
+.. index:: boot, grub, bls, loader
 .. _grub-rebuild:
 
 Как пересобрать конфиг Grub 2?
 ====================================
+
+Начиная с Fedora 30, по умолчанию вместо `устаревшего способа <https://fedoraproject.org/wiki/Changes/BootLoaderSpecByDefault>`__ с добавлением ядер через grubby, применяется :ref:`BLS <grub-bls-info>`, поэтому пересборка конфига больше не требуется.
 
 Пересборка конфига Grub 2 для legacy конфигураций:
 
@@ -114,6 +116,56 @@
 .. code-block:: text
 
     sudo grub2-mkconfig -o /boot/efi/EFI/fedora/grub.cfg
+
+.. index:: boot, grub, bls, loader
+.. _grub-bls-info:
+
+Что такое BLS и почему он используется по умолчанию?
+=======================================================
+
+`BLS <https://systemd.io/BOOT_LOADER_SPECIFICATION>`__ - это универсальный формат параметров загрузки, который будет поддерживаться большинством современных загрузчиков.
+
+Все параметры генерируются на этапе компиляции ядра и сохраняются в специальном conf-файле, который устанавливается в каталог ``/boot/loader/entries``.
+
+Т.к. это статические файлы, :ref:`нестандартные параметры ядра <kernelpm-perm>` теперь устанавливаются при помощи ``grubenv``.
+
+.. index:: boot, grub, bls, loader
+.. _grub-to-bls:
+
+Как перейти с классического Grub 2 на BLS?
+==============================================
+
+Переход с классического Grub 2 на BLS полностью автоматизирован. Выполним специальный скрипт, входящий в поставку Fedora 30+:
+
+.. code-block:: text
+
+    sudo grub2-switch-to-blscfg
+
+.. index:: boot, grub, bls, loader
+.. _grub-from-bls:
+
+Как вернуться с BLS на классический Grub 2?
+==============================================
+
+Установим legacy-пакет **grubby**, т.к. он используется при добавлении ядер:
+
+.. code-block:: text
+
+    sudo dnf install grubby
+
+Откроем файл конфигурации Grub 2 в текстовом редакторе:
+
+.. code-block:: text
+
+    sudoedit /etc/default/grub
+
+Внесём правки, запретив использование BLS:
+
+.. code-block:: text
+
+    GRUB_ENABLE_BLSCFG=false
+
+:ref:`Пересоберём конфиг Grub 2 <grub-rebuild>` и перезагрузим систему.
 
 .. index:: slow shutdown, shutdown
 .. _slow-shutdown:
@@ -876,3 +928,16 @@ KDE предоставляет особый PAM модуль для автома
     sudo plymouth-set-default-theme charge -R
 
 Изменения вступят в силу при следующей загрузке системы. Логотип больше отображаться не будет.
+
+.. index:: ntfs, partition, windows, fast boot, hybrid shutdown, powercfg
+.. _ntfs-readonly:
+
+Все NTFS тома монтируются в режиме только для чтения. Как исправить?
+========================================================================
+
+Некорректное размонтирование разделов - это особенность работы режима гибридного завершения работы (`hybrid shutdown <https://docs.microsoft.com/en-us/windows-hardware/drivers/kernel/distinguishing-fast-startup-from-wake-from-hibernation>`__) в ОС Microsoft Windows, при котором система не завершает свою работу, а вместо этого всегда переходит в режим глубокого сна.
+
+Данный режим несовместим с другими операционными системами, в т.ч. GNU/Linux, поэтому должен быть отключён в обязательном порядке при использовании :ref:`dual-boot <dual-boot>`.
+
+  1. запустим командную строку с правами администратора, затем выполним ``powercfg -h off``;
+  2. запретим использование режима быстрой загрузки (fast boot) в настройках UEFI BIOS.

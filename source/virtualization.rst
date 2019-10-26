@@ -196,3 +196,55 @@
     sudo restorecon -Rv /media/foo-bar/images
 
 В настройках Virt Manager добавим новую библиотеку ``/media/foo-bar/images`` и зададим её использование для всех виртуальных машин по умолчанию.
+
+.. index:: virtualization, kvm, transfer
+.. _kvm-transfer:
+
+Как переместить виртуальную машину KVM на другой ПК?
+========================================================
+
+Переместим образы дисков из каталога ``/var/lib/libvirt/images`` старого хоста на новый :ref:`любым удобным способом <copying-data>`.
+
+Экспортируем конфигурацию виртуальной машины:
+
+.. code-block:: text
+
+    virsh dumpxml vmname > vmname.xml
+
+Здесь **vmname** - название машины KVM, а **vmname.xml** - имя файла, в котором будут сохранены настройки.
+
+Импортируем ранее сохранённую конфигурацию:
+
+.. code-block:: text
+
+    virsh define /path/to/vmname.xml
+
+Новая виртуальная машина появится в списке и будет готова к работе немедленно.
+
+.. index:: virtualization, virtualbox, transfer
+.. _virtualbox-transfer:
+
+Как переместить виртуальную машину VirtualBox на другой ПК?
+===============================================================
+
+Получим список доступных виртуальных машин VirtualBox:
+
+.. code-block:: text
+
+    vboxmanage list vms
+
+Экспортируем настройки и данные в открытый формат виртуализации версии 2.0:
+
+.. code-block:: text
+
+    vboxmanage export vmname -o vmname.ova --ovf20
+
+Здесь **vmname** - название виртуальной машины VirtualBox, а **vmname.ova** - имя файла экспорта.
+
+Переместим полученный файл на новый хост :ref:`любым удобным способом <copying-data>`, затем осуществим его импорт:
+
+.. code-block:: text
+
+    vboxmanage import /path/to/vmname.ova --options importtovdi
+
+Через некоторое время новая виртуальная машина появится в списке и будет готова к работе.
